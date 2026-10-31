@@ -1,13 +1,13 @@
 import AVFoundation
 import CoreAudio
 
-/// Runs the commentary chain on the Mac's live audio.
+/// Runs the dialog chain on the Mac's live audio.
 ///
 /// The aggregate device's IO callback hands us the tapped system audio and the speaker buffers in
 /// one call; we render the chain synchronously in between using AVAudioEngine's realtime manual
 /// rendering mode, so there is no extra buffering beyond what the effects themselves add.
 final class LiveBooster {
-    let chain: CommentaryChain
+    let chain: DialogChain
     private let tap: SystemAudioTap
     private let engine = AVAudioEngine()
     private let format: AVAudioFormat
@@ -39,7 +39,7 @@ final class LiveBooster {
 
     var outputName: String { tap.outputName }
 
-    init(chain: CommentaryChain) throws {
+    init(chain: DialogChain) throws {
         self.chain = chain
         tap = try SystemAudioTap()
         format = AVAudioFormat(standardFormatWithSampleRate: tap.sampleRate, channels: 2)!

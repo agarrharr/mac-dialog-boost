@@ -23,14 +23,14 @@ final class SystemAudioTap {
         let exclude = me == kAudioObjectUnknown ? [] : [me]
         description = CATapDescription(stereoGlobalTapButExcludeProcesses: exclude)
         description.uuid = UUID()
-        description.name = "Commentary Boost"
+        description.name = "Dialog Boost"
         description.isPrivate = true
         description.muteBehavior = .unmuted
         try check(AudioHardwareCreateProcessTap(description, &tapID), "Creating the system audio tap")
 
         let aggregate: [String: Any] = [
-            kAudioAggregateDeviceNameKey: "Commentary Boost",
-            kAudioAggregateDeviceUIDKey: "commentary-boost-\(UUID().uuidString)",
+            kAudioAggregateDeviceNameKey: "Dialog Boost",
+            kAudioAggregateDeviceUIDKey: "mac-dialog-boost-\(UUID().uuidString)",
             kAudioAggregateDeviceMainSubDeviceKey: outputUID,
             kAudioAggregateDeviceIsPrivateKey: true,
             kAudioAggregateDeviceIsStackedKey: false,

@@ -1,8 +1,8 @@
 import AVFoundation
 
-/// Runs the commentary chain over an audio file, faster than realtime. Handy for trying settings
+/// Runs the dialog chain over an audio file, faster than realtime. Handy for trying settings
 /// on a recorded clip.
-func processFile(input: URL, output: URL, chain: CommentaryChain) throws {
+func processFile(input: URL, output: URL, chain: DialogChain) throws {
     let file = try AVAudioFile(forReading: input)
     let format = AVAudioFormat(standardFormatWithSampleRate: 48_000, channels: 2)!
     let engine = AVAudioEngine()

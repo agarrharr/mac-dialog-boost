@@ -1,10 +1,10 @@
 import Foundation
 
 /// Starts the phone remote and prints its QR code. Everything here runs on the main queue.
-func startRemote(port: UInt16, chain: CommentaryChain, booster: LiveBooster) throws -> RemoteServer {
+func startRemote(port: UInt16, chain: DialogChain, booster: LiveBooster) throws -> RemoteServer {
     func state() -> RemoteServer.Response {
         let state: [String: Any] = [
-            "cars": chain.carsPercent,
+            "background": chain.backgroundPercent,
             "bypassed": chain.bypassed,
             "highQuality": chain.highQuality,
             "active": booster.isActive,
@@ -19,8 +19,8 @@ func startRemote(port: UInt16, chain: CommentaryChain, booster: LiveBooster) thr
             return RemoteServer.Response(contentType: "text/html; charset=utf-8", body: Data(remotePageHTML.utf8))
         case "/api/state":
             break
-        case "/api/cars":
-            if let value = query["v"].flatMap(Float.init) { chain.carsPercent = value }
+        case "/api/background":
+            if let value = query["v"].flatMap(Float.init) { chain.backgroundPercent = value }
         case "/api/bypass":
             chain.bypassed.toggle()
         case "/api/model":

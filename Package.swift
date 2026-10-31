@@ -2,18 +2,18 @@
 import PackageDescription
 
 let package = Package(
-    name: "CommentaryBoost",
+    name: "MacDialogBoost",
     platforms: [.macOS(.v15)],
     targets: [
         .executableTarget(
-            name: "commentary-boost",
-            path: "Sources/CommentaryBoost",
+            name: "mac-dialog-boost",
+            path: "Sources/MacDialogBoost",
             exclude: ["Info.plist"],
             linkerSettings: [
                 // Embed an Info.plist so macOS can show the "System Audio Recording" permission prompt.
                 .unsafeFlags([
                     "-Xlinker", "-sectcreate", "-Xlinker", "__TEXT",
-                    "-Xlinker", "__info_plist", "-Xlinker", "Sources/CommentaryBoost/Info.plist",
+                    "-Xlinker", "__info_plist", "-Xlinker", "Sources/MacDialogBoost/Info.plist",
                 ]),
             ]
         ),

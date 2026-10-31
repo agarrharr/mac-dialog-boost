@@ -1,7 +1,7 @@
 import Foundation
 
 /// Terminal front end for live mode: a status line with level meters and single-key controls.
-func runLive(chain: CommentaryChain, remotePort: UInt16?) -> Never {
+func runLive(chain: DialogChain, remotePort: UInt16?) -> Never {
     // The status line is written straight to the file handle; keep print() output in order with it.
     setvbuf(stdout, nil, _IOLBF, 0)
 
@@ -46,8 +46,8 @@ func runLive(chain: CommentaryChain, remotePort: UInt16?) -> Never {
     }
 
     print("""
-    Commentary Boost → \(booster.outputName)
-    ↑/↓ cars louder/quieter · b bypass · m isolation model · q quit
+    Dialog Boost → \(booster.outputName)
+    ↑/↓ background louder/quieter · b bypass · m isolation model · q quit
 
     """)
 
@@ -73,9 +73,9 @@ func runLive(chain: CommentaryChain, remotePort: UInt16?) -> Never {
         let mode = !booster.isActive ? "waiting for audio… (your sound is unchanged)"
             : chain.bypassed ? "BYPASSED (original sound)"
             : chain.highQuality ? "High Quality Voice" : "Voice"
-        let line = "Cars \(bar(chain.carsPercent / 100, width: 10)) \(String(format: "%3.0f", chain.carsPercent))%"
+        let line = "Background \(bar(chain.backgroundPercent / 100, width: 10)) \(String(format: "%3.0f", chain.backgroundPercent))%"
             + "   in \(meter(input))  out \(meter(output))   \(mode)"
-            + (ProcessInfo.processInfo.environment["COMMENTARY_DEBUG"] != nil ? "   [\(booster.callbackCount) \(booster.inputLayout)]" : "")
+            + (ProcessInfo.processInfo.environment["DIALOG_BOOST_DEBUG"] != nil ? "   [\(booster.callbackCount) \(booster.inputLayout)]" : "")
         FileHandle.standardOutput.write(("\r\u{1B}[2K" + line).data(using: .utf8)!)
     }
     timer.resume()
@@ -92,14 +92,14 @@ func runLive(chain: CommentaryChain, remotePort: UInt16?) -> Never {
                 guard escape.count == 3 else { continue }
                 let key = escape[2]
                 escape.removeAll()
-                if key == UInt8(ascii: "A") { DispatchQueue.main.async { chain.carsPercent += 5 } }
-                if key == UInt8(ascii: "B") { DispatchQueue.main.async { chain.carsPercent -= 5 } }
+                if key == UInt8(ascii: "A") { DispatchQueue.main.async { chain.backgroundPercent += 5 } }
+                if key == UInt8(ascii: "B") { DispatchQueue.main.async { chain.backgroundPercent -= 5 } }
                 continue
             }
             DispatchQueue.main.async {
                 switch Character(UnicodeScalar(byte)) {
-                case "+", "=": chain.carsPercent += 5
-                case "-", "_": chain.carsPercent -= 5
+                case "+", "=": chain.backgroundPercent += 5
+                case "-", "_": chain.backgroundPercent -= 5
                 case "b", "B": chain.bypassed.toggle()
                 case "m", "M": chain.highQuality.toggle()
                 case "q", "Q": quit()
@@ -113,13 +113,13 @@ func runLive(chain: CommentaryChain, remotePort: UInt16?) -> Never {
 }
 
 private let permissionHelp = """
-No audio is reaching Commentary Boost yet. If a race is playing, your terminal app needs
+No audio is reaching Dialog Boost yet. If something is playing, your terminal app needs
 permission to hear system audio. macOS doesn't ask for this automatically when you run a
 command-line tool, so add it by hand:
 
   1. System Settings → Privacy & Security → Screen & System Audio Recording
   2. Under "System Audio Recording Only", click + and add your terminal app (e.g. Terminal)
-  3. Quit and reopen the terminal app, then run commentary-boost again
+  3. Quit and reopen the terminal app, then run mac-dialog-boost again
 
 Nothing is muted while this message shows. Press q to quit.
 """

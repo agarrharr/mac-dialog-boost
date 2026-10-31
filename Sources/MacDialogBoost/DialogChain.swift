@@ -3,15 +3,15 @@ import AudioToolbox
 
 /// leveler (compressor) -> voice isolation -> peak limiter
 ///
-/// "Cars" is how much of the original mix is blended back in on top of the isolated voices:
-/// 0% is commentary only, 100% is the untouched broadcast. The leveler runs first so the
-/// car sound that gets blended back in has its loudest moments already squashed.
-final class CommentaryChain {
+/// "Background" is how much of the original mix is blended back in on top of the isolated voices:
+/// 0% is voices only, 100% is the untouched original. The leveler runs first so the
+/// background that gets blended back in has its loudest moments already squashed.
+final class DialogChain {
     let isolation = AVAudioUnitEffect(audioComponentDescription: .apple(kAudioUnitSubType_AUSoundIsolation))
     let leveler = AVAudioUnitEffect(audioComponentDescription: .apple(kAudioUnitSubType_DynamicsProcessor))
     let limiter = AVAudioUnitEffect(audioComponentDescription: .apple(kAudioUnitSubType_PeakLimiter))
 
-    var carsPercent: Float = 20 { didSet { carsPercent = min(max(carsPercent, 0), 100); apply() } }
+    var backgroundPercent: Float = 20 { didSet { backgroundPercent = min(max(backgroundPercent, 0), 100); apply() } }
     var highQuality = false { didSet { apply() } }
     var bypassed = false { didSet { apply() } }
 
@@ -25,7 +25,7 @@ final class CommentaryChain {
     }
 
     private func apply() {
-        set(isolation, kAUSoundIsolationParam_WetDryMixPercent, 100 - carsPercent)
+        set(isolation, kAUSoundIsolationParam_WetDryMixPercent, 100 - backgroundPercent)
         set(isolation, kAUSoundIsolationParam_SoundToIsolate,
             highQuality ? Float(kAUSoundIsolationSoundType_HighQualityVoice) : Float(kAUSoundIsolationSoundType_Voice))
 
@@ -36,7 +36,7 @@ final class CommentaryChain {
         set(leveler, kDynamicsProcessorParam_ReleaseTime, 0.15)
         set(leveler, kDynamicsProcessorParam_OverallGain, 6)
 
-        // Makeup gain: removing the cars leaves things ~8 dB quieter than the original broadcast.
+        // Makeup gain: removing the background leaves things ~8 dB quieter than the original.
         set(limiter, kLimiterParam_PreGain, bypassed ? 0 : 8)
         set(limiter, kLimiterParam_AttackTime, 0.004)
         set(limiter, kLimiterParam_DecayTime, 0.05)

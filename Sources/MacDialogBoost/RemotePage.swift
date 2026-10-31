@@ -8,9 +8,9 @@ let remotePageHTML = #"""
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Commentary">
+<meta name="apple-mobile-web-app-title" content="Dialog Boost">
 <meta name="theme-color" content="#0d0f12">
-<title>Commentary Boost</title>
+<title>Dialog Boost</title>
 <style>
   :root {
     --bg: #0d0f12; --panel: #171a1f; --line: #262a31; --text: #f2f3f5; --dim: #8b919c;
@@ -29,7 +29,7 @@ let remotePageHTML = #"""
   section { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; }
   .label { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
   .label span:first-child { color: var(--dim); font-size: 14px; }
-  #carsValue { font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  #backgroundValue { font-size: 34px; font-weight: 700; font-variant-numeric: tabular-nums; }
   input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 44px; background: transparent; margin: 0; }
   input[type=range]::-webkit-slider-runnable-track { height: 10px; border-radius: 5px;
     background: linear-gradient(90deg, var(--accent) var(--fill, 20%), var(--line) var(--fill, 20%)); }
@@ -54,17 +54,17 @@ let remotePageHTML = #"""
 </head>
 <body>
   <header>
-    <h1>Commentary Boost</h1>
+    <h1>Dialog Boost</h1>
     <div class="status"><span class="dot" id="dot"></span><span id="statusText">Connecting…</span></div>
   </header>
 
   <section>
-    <div class="label"><span>Car sound</span><span id="carsValue">20%</span></div>
-    <input type="range" id="cars" min="0" max="100" step="1" value="20" aria-label="Car sound">
-    <div class="ends"><span>Commentary only</span><span>Original</span></div>
+    <div class="label"><span>Background sound</span><span id="backgroundValue">20%</span></div>
+    <input type="range" id="background" min="0" max="100" step="1" value="20" aria-label="Background sound">
+    <div class="ends"><span>Voices only</span><span>Original</span></div>
     <div class="chips">
-      <button data-cars="0">0%</button><button data-cars="10">10%</button>
-      <button data-cars="20">20%</button><button data-cars="40">40%</button>
+      <button data-level="0">0%</button><button data-level="10">10%</button>
+      <button data-level="20">20%</button><button data-level="40">40%</button>
     </div>
   </section>
 
@@ -92,7 +92,7 @@ let remotePageHTML = #"""
 <script>
   const key = new URLSearchParams(location.search).get("k") || "";
   const $ = (id) => document.getElementById(id);
-  const slider = $("cars");
+  const slider = $("background");
   let dragging = false, sendTimer = null, lastSent = null;
 
   async function api(path, params = {}) {
@@ -103,12 +103,12 @@ let remotePageHTML = #"""
   }
 
   function render(s) {
-    if (!dragging) setSlider(s.cars);
+    if (!dragging) setSlider(s.background);
     $("bypass").classList.toggle("on", s.bypassed);
     $("bypass").textContent = s.bypassed ? "Hearing original" : "Compare original";
     $("model").textContent = s.highQuality ? "Model: HQ voice" : "Model: Voice";
     $("keysNote").hidden = s.canControlPlayback;
-    document.querySelectorAll("[data-cars]").forEach(b => b.classList.toggle("on", +b.dataset.cars === Math.round(s.cars)));
+    document.querySelectorAll("[data-level]").forEach(b => b.classList.toggle("on", +b.dataset.level === Math.round(s.background)));
     $("dot").className = "dot " + (s.active ? "live" : "");
     $("statusText").textContent = s.active ? (s.bypassed ? "Original sound" : "Boosting") : "Waiting for audio";
   }
@@ -121,29 +121,29 @@ let remotePageHTML = #"""
   function setSlider(v) {
     slider.value = v;
     slider.style.setProperty("--fill", v + "%");
-    $("carsValue").textContent = Math.round(v) + "%";
+    $("backgroundValue").textContent = Math.round(v) + "%";
   }
 
   async function refresh() {
     try { render(await api("state")); } catch { disconnected(); }
   }
 
-  function sendCars(v) {
+  function sendLevel(v) {
     if (v === lastSent) return;
     lastSent = v;
-    api("cars", { v }).then(render).catch(disconnected);
+    api("background", { v }).then(render).catch(disconnected);
   }
 
   slider.addEventListener("input", () => {
     dragging = true;
     setSlider(+slider.value);
     clearTimeout(sendTimer);
-    sendTimer = setTimeout(() => sendCars(+slider.value), 60);
+    sendTimer = setTimeout(() => sendLevel(+slider.value), 60);
   });
-  slider.addEventListener("change", () => { dragging = false; sendCars(+slider.value); });
+  slider.addEventListener("change", () => { dragging = false; sendLevel(+slider.value); });
 
-  document.querySelectorAll("[data-cars]").forEach(b =>
-    b.addEventListener("click", () => { setSlider(+b.dataset.cars); sendCars(+b.dataset.cars); }));
+  document.querySelectorAll("[data-level]").forEach(b =>
+    b.addEventListener("click", () => { setSlider(+b.dataset.level); sendLevel(+b.dataset.level); }));
 
   const press = (id, path) => $(id).addEventListener("click", () => {
     navigator.vibrate?.(10);

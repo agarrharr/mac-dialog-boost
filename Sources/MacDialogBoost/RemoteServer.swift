@@ -88,9 +88,15 @@ final class RemoteServer {
 
 /// The access code for the remote, kept between runs so a home-screen bookmark keeps working.
 func remoteToken() -> String {
-    let folder = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        .appendingPathComponent("CommentaryBoost", isDirectory: true)
+    let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+    let folder = support.appendingPathComponent("MacDialogBoost", isDirectory: true)
     let file = folder.appendingPathComponent("remote-token")
+
+    // Carry over the code from when this was called Commentary Boost.
+    let oldFolder = support.appendingPathComponent("CommentaryBoost", isDirectory: true)
+    if !FileManager.default.fileExists(atPath: folder.path), FileManager.default.fileExists(atPath: oldFolder.path) {
+        try? FileManager.default.moveItem(at: oldFolder, to: folder)
+    }
     if let saved = try? String(contentsOf: file, encoding: .utf8).trimmingCharacters(in: .whitespacesAndNewlines), !saved.isEmpty {
         return saved
     }

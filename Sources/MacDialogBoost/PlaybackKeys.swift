@@ -17,7 +17,7 @@ enum PlaybackKeys {
         postMediaKey(16)  // NX_KEYTYPE_PLAY
     }
 
-    /// The ← key in the front window: F1 TV, YouTube and most web players jump back a few seconds.
+    /// The ← key in the front window: YouTube and most web players jump back a few seconds.
     static func back() {
         postKey(123)  // kVK_LeftArrow
     }
