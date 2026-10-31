@@ -45,7 +45,8 @@ if let background = takeOption("--background") ?? takeOption("--cars") {  // --c
     chain.backgroundPercent = value
 }
 chain.highQuality = takeFlag("--hq")
-let remotePort: UInt16? = takeFlag("--no-remote") ? nil : (takeOption("--port").flatMap { UInt16($0) } ?? 8737)
+let port = takeOption("--port").flatMap { UInt16($0) } ?? 8737
+let remotePort: UInt16? = takeFlag("--no-remote") ? nil : port
 
 if arguments.first == "process" {
     guard arguments.count == 3 else { fputs(usage + "\n", stderr); exit(2) }

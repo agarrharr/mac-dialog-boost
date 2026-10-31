@@ -45,6 +45,13 @@ func defaultOutputDevice() throws -> AudioDeviceID {
     try readProperty(AudioObjectID(kAudioObjectSystemObject), kAudioHardwarePropertyDefaultOutputDevice, initial: AudioDeviceID(kAudioObjectUnknown))
 }
 
+/// Calls `handler` on the main queue whenever the Mac's sound output changes (picked in Control
+/// Center, AirPlay/Screen Mirroring started, HDMI or headphones plugged in…).
+func onDefaultOutputChange(_ handler: @escaping () -> Void) {
+    var addr = address(kAudioHardwarePropertyDefaultOutputDevice)
+    AudioObjectAddPropertyListenerBlock(AudioObjectID(kAudioObjectSystemObject), &addr, .main) { _, _ in handler() }
+}
+
 /// The Core Audio object for this process, so the tap can leave our own (processed) output alone.
 func ownProcessObject() throws -> AudioObjectID {
     var addr = address(kAudioHardwarePropertyTranslatePIDToProcessObject)

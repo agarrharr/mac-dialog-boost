@@ -51,6 +51,26 @@ func runLive(chain: DialogChain, remotePort: UInt16?) -> Never {
 
     """)
 
+    // Follow the Mac's sound output, e.g. when Screen Mirroring to an Apple TV starts. macOS can
+    // report several changes in a row while a device connects, so wait for it to settle.
+    var pendingSwitch: DispatchWorkItem?
+    onDefaultOutputChange {
+        pendingSwitch?.cancel()
+        let work = DispatchWorkItem {
+            let line: String
+            do {
+                guard try booster.followCurrentOutput() else { return }
+                line = "Dialog Boost → \(booster.outputName) (sound output changed)"
+            } catch {
+                line = "Dialog Boost couldn't switch to the new sound output (\(error)). Your audio is back to "
+                    + "normal; change the output again to retry, or press q."
+            }
+            FileHandle.standardOutput.write("\r\u{1B}[2K\(line)\n".data(using: .utf8)!)
+        }
+        pendingSwitch = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
+    }
+
     let started = Date()
     var shownPermissionHelp = false
     let timer = DispatchSource.makeTimerSource(queue: .main)

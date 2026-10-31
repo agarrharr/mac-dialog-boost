@@ -8,13 +8,15 @@ import CoreAudio
 /// rendering mode, so there is no extra buffering beyond what the effects themselves add.
 final class LiveBooster {
     let chain: DialogChain
-    private let tap: SystemAudioTap
-    private let engine = AVAudioEngine()
-    private let format: AVAudioFormat
+    // Rebuilt by `followCurrentOutput()` when the Mac's sound output changes.
+    private var tap: SystemAudioTap
+    private var engine = AVAudioEngine()
+    private var source: AVAudioSourceNode?
+    private var format: AVAudioFormat
+    private var outputBuffer: AVAudioPCMBuffer
     private let maxFrames: AVAudioFrameCount = 4096
     private let inputLeft: UnsafeMutablePointer<Float>
     private let inputRight: UnsafeMutablePointer<Float>
-    private let outputBuffer: AVAudioPCMBuffer
     private var ioProcID: AudioDeviceIOProcID?
 
     /// Peak levels since the UI last read them (written on the audio thread).
@@ -66,6 +68,7 @@ final class LiveBooster {
             }
             return noErr
         }
+        self.source = source
         engine.attach(source)
         chain.attach(to: engine, from: source, to: engine.mainMixerNode, format: format)
         engine.prepare()
@@ -110,6 +113,27 @@ final class LiveBooster {
         }
         engine.stop()
         tap.invalidate()
+    }
+
+    /// Moves to the Mac's current sound output (AirPlay, HDMI, headphones…) if it has changed since
+    /// we started. Returns whether it switched. If it throws, we're left stopped with the Mac's
+    /// audio back to normal; calling again retries.
+    @discardableResult
+    func followCurrentOutput() throws -> Bool {
+        guard try defaultOutputDevice() != tap.outputDevice || ioProcID == nil else { return false }
+        stop()
+        for node in chain.nodes + [source].compactMap({ $0 }) { engine.detach(node) }
+        source = nil
+        engine = AVAudioEngine()
+        heardAudio = false
+        isActive = false
+        callbackCount = 0
+
+        tap = try SystemAudioTap()
+        format = AVAudioFormat(standardFormatWithSampleRate: tap.sampleRate, channels: 2)!
+        outputBuffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: maxFrames)!
+        try start()
+        return true
     }
 }
 

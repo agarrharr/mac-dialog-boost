@@ -15,8 +15,10 @@ final class DialogChain {
     var highQuality = false { didSet { apply() } }
     var bypassed = false { didSet { apply() } }
 
+    var nodes: [AVAudioNode] { [leveler, isolation, limiter] }
+
     func attach(to engine: AVAudioEngine, from source: AVAudioNode, to destination: AVAudioNode, format: AVAudioFormat) {
-        for node in [isolation, leveler, limiter] { engine.attach(node) }
+        for node in nodes { engine.attach(node) }
         engine.connect(source, to: leveler, format: format)
         engine.connect(leveler, to: isolation, format: format)
         engine.connect(isolation, to: limiter, format: format)

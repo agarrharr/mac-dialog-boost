@@ -119,8 +119,12 @@ The voices stay at their original loudness or slightly louder.
 
 - It adds about 85 ms of audio delay. That's unnoticeable over action footage but slightly
   visible as lip sync on close-up talking shots.
-- It plays to whatever output was selected when it started. If you switch to headphones or
-  AirPods, restart it.
+- It follows the Mac's sound output. Switch to headphones, plug in HDMI, or start Screen
+  Mirroring while it's running, and it moves over and prints the new output in Terminal.
+- **Watching on an Apple TV:** use **Screen Mirroring** (Control Center → Screen Mirroring),
+  not the AirPlay button in the video player. AirPlaying a video hands the stream to the Apple
+  TV, which plays it itself, so the sound never goes through the Mac and can't be processed.
+  An HDMI cable from the Mac to the TV works too.
 - Isolation keeps anything voice-like, so crowd chants, singing and radio chatter come through
   too and may sound a bit processed.
 - To process a recording instead of live audio:

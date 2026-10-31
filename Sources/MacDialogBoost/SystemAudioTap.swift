@@ -11,11 +11,13 @@ final class SystemAudioTap {
     private(set) var tapID = AudioObjectID(kAudioObjectUnknown)
     private(set) var aggregateID = AudioDeviceID(kAudioObjectUnknown)
     private let description: CATapDescription
+    let outputDevice: AudioDeviceID
     let outputName: String
     let sampleRate: Double
 
     init() throws {
         let output = try defaultOutputDevice()
+        outputDevice = output
         let outputUID = try readString(output, kAudioDevicePropertyDeviceUID)
         outputName = (try? readString(output, kAudioObjectPropertyName)) ?? outputUID
 
