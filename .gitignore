@@ -1,0 +1,8 @@
+.build/
+.swiftpm/
+.DS_Store
+
+# Test audio (may include copyrighted broadcast clips)
+samples/
+*.wav
+*.m4a
